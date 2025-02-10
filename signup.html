@@ -24,9 +24,21 @@
       </div>
       <button type="submit" class="w-full bg-green-500 hover:bg-green-600 py-2 rounded">Cadastrar</button>
     </form>
-    <p class="mt-4 text-center">Já possui conta? <a href="login.html" class="text-green-400 hover:underline">Entrar</a></p>
+    <p class="mt-4 text-center">Já possui conta? <a id="linkLogin" href="#" class="text-green-400 hover:underline">Entrar</a></p>
   </div>
   <script>
+    // Se já estiver logado, redireciona para game.html
+    if(localStorage.getItem('token')){
+      window.location.href = 'game.html';
+    }
+    
+    // Prefill email se existir query param ?email=
+    const params = new URLSearchParams(window.location.search);
+    const emailParam = params.get('email');
+    if(emailParam){
+      document.getElementById('email').value = emailParam;
+    }
+
     document.getElementById('signupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('name').value;
@@ -38,12 +50,18 @@
         body: JSON.stringify({ name, email, password })
       });
       const data = await res.json();
-      if (data.error) {
+      if(data.error) {
         alert(data.error);
       } else {
         localStorage.setItem('token', data.token);
         window.location.href = 'game.html';
       }
+    });
+
+    document.getElementById('linkLogin').addEventListener('click', (e) => {
+      e.preventDefault();
+      const emailVal = document.getElementById('email').value;
+      window.location.href = `login.html?email=${encodeURIComponent(emailVal)}`;
     });
   </script>
 </body>
