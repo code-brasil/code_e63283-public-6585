@@ -10,11 +10,11 @@
   <header class="p-4 flex justify-between items-center">
     <h1 class="text-3xl font-bold">Usuários Cadastrados</h1>
     <nav>
-      <a href="admin_index.html" class="text-green-300 hover:underline">Dashboard</a>
+      <a href="admin_dashboard.html" class="text-green-300 hover:underline">Dashboard</a>
     </nav>
   </header>
   <main class="p-4">
-    <table class="min-w-full bg-gray-800">
+    <table class="min-w-full bg-gray-800 mb-4">
       <thead>
         <tr>
           <th class="py-2 px-4 border-b">ID</th>
@@ -23,25 +23,28 @@
           <th class="py-2 px-4 border-b">Balance</th>
           <th class="py-2 px-4 border-b">is_admin</th>
           <th class="py-2 px-4 border-b">Token</th>
-          <th class="py-2 px-4 border-b">Actions</th>
+          <th class="py-2 px-4 border-b">Ações</th>
         </tr>
       </thead>
-      <tbody id="usersTable">
-      </tbody>
+      <tbody id="usersTable"></tbody>
     </table>
-    <div class="mt-4">
-      <h2 class="text-xl font-bold">Criar Novo Usuário</h2>
-      <form id="createUserForm">
-        <input type="text" id="name" placeholder="Nome" class="p-2 text-black" required>
-        <input type="email" id="email" placeholder="Email" class="p-2 text-black" required>
-        <input type="password" id="password" placeholder="Senha" class="p-2 text-black" required>
-        <input type="number" id="balance" placeholder="Balance" class="p-2 text-black" value="1000">
-        <label class="inline-block ml-2">
-          <input type="checkbox" id="is_admin"> Admin
-        </label>
-        <button type="submit" class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded">Criar</button>
-      </form>
-    </div>
+    <!-- Formulário para criar usuário -->
+    <form id="createUserForm" class="mb-4">
+      <input type="text" id="name" placeholder="Nome" class="p-2 text-black" required>
+      <input type="email" id="email" placeholder="Email" class="p-2 text-black" required>
+      <input type="password" id="password" placeholder="Senha" class="p-2 text-black" required>
+      <input type="number" id="balance" placeholder="Balance" class="p-2 text-black" value="1000">
+      <label class="inline-block ml-2">
+        <input type="checkbox" id="is_admin"> Admin
+      </label>
+      <button type="submit" class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded">Criar</button>
+    </form>
+    <!-- Formulário para atualizar usuário -->
+    <form id="updateUserForm">
+      <input type="number" id="userId" placeholder="ID do usuário" class="p-2 text-black" required>
+      <input type="text" id="updatesUser" placeholder='Updates (formato JSON)' class="p-2 text-black" required>
+      <button type="submit" class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded">Atualizar Usuário</button>
+    </form>
   </main>
   <script>
     const projectId = 'code_e63283';
@@ -79,7 +82,7 @@
           <td class="py-2 px-4 border-b">${user.name}</td>
           <td class="py-2 px-4 border-b">${user.email}</td>
           <td class="py-2 px-4 border-b">${user.balance}</td>
-          <td class="py-2 px-4 border-b">${user.is_admin}</nobr></td>
+          <td class="py-2 px-4 border-b">${user.is_admin}</td>
           <td class="py-2 px-4 border-b">token_${user.id}</td>
           <td class="py-2 px-4 border-b">
             <button onclick="deleteUser(${user.id})" class="bg-red-500 hover:bg-red-600 py-1 px-2 rounded">Delete</button>
@@ -101,11 +104,28 @@
       const password = document.getElementById('password').value;
       const balance = parseInt(document.getElementById('balance').value);
       const is_admin = document.getElementById('is_admin').checked;
-
       await fetch(`https://api.greb.com.br/functions/${projectId}/admin_users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
         body: JSON.stringify({ action: 'create', name, email, password, balance, is_admin })
+      });
+      loadUsers();
+    });
+
+    document.getElementById('updateUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById('userId').value;
+      let updates = {};
+      try {
+        updates = JSON.parse(document.getElementById('updatesUser').value);
+      } catch(err) {
+        alert('Formato de updates inválido. Use JSON.');
+        return;
+      }
+      await fetch(`https://api.greb.com.br/functions/${projectId}/admin_users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ action: 'update', user_id: parseInt(userId), updates })
       });
       loadUsers();
     });
