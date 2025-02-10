@@ -74,7 +74,7 @@
       </div>
       <hr class="my-4 border-white">
       <div class="player-area">
-        <h2 class="text-xl text-white mb-2">Suas Cartas</h2>
+        <h2 class="text-xl text-white mb-2">Você</h2>
         <div id="playerCards" class="flex justify-center"></div>
       </div>
     </div>
@@ -155,6 +155,7 @@
       const container = document.getElementById('playerCards');
       container.innerHTML = '';
       cards.forEach(card => {
+        // Aqui, para as cartas do jogador, sempre mostrar face up
         container.appendChild(createCardElement(card, true));
       });
     }
@@ -163,7 +164,7 @@
       const container = document.getElementById('dealerCards');
       container.innerHTML = '';
       cards.forEach((card, index) => {
-        // Mostra todas as cartas do player, para o dealer mostra apenas a primeira
+        // Para o dealer, mostra a carta se for a primeira ou se dealerRevealed for true
         let faceUp = dealerRevealed || (index === 0);
         container.appendChild(createCardElement(card, faceUp));
       });
