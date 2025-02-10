@@ -10,34 +10,38 @@
   <header class="p-4 flex justify-between items-center">
     <h1 class="text-3xl font-bold">Partidas em Andamento</h1>
     <nav>
-      <a href="admin_dashboard.html" class="text-green-300 hover:underline">Dashboard</a>
+      <a href="admin_index.html" class="text-green-300 hover:underline">Dashboard</a>
     </nav>
   </header>
   <main class="p-4">
-    <table class="min-w-full bg-gray-800 mb-4">
+    <table class="min-w-full bg-gray-800">
       <thead>
         <tr>
           <th class="py-2 px-4 border-b">ID</th>
           <th class="py-2 px-4 border-b">User ID</th>
-          <th class="py-2 px-4 border-b">Aposta</th>
-          <th class="py-2 px-4 border-b">Resultado</th>
-          <th class="py-2 px-4 border-b">Estado (JSON)</th>
-          <th class="py-2 px-4 border-b">Ações</th>
+          <th class="py-2 px-4 border-b">Bet</th>
+          <th class="py-2 px-4 border-b">Result</th>
+          <th class="py-2 px-4 border-b">State</th>
+          <th class="py-2 px-4 border-b">Actions</th>
         </tr>
       </thead>
       <tbody id="gamesTable"></tbody>
     </table>
-    <!-- Formulário para atualizar/editar uma partida -->
-    <form id="updateGameForm" class="mb-4">
-      <input type="number" id="gameId" placeholder="ID da partida" class="p-2 text-black" required>
-      <input type="text" id="updates" placeholder='Updates (formato JSON)' class="p-2 text-black" required>
-      <button type="submit" class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded">Atualizar Partida</button>
-    </form>
+    
+    <!-- Formulário simples para atualizar uma partida -->
+    <div class="mt-6">
+      <h2 class="text-xl font-bold">Atualizar Partida</h2>
+      <form id="updateGameForm" class="flex flex-col gap-2">
+        <input type="number" id="updateGameId" placeholder="ID da Partida" class="p-2 text-black" required>
+        <textarea id="updateGameState" placeholder='Ex: {"dealer_cards": [...], "player_cards": [...]}' class="p-2 text-black" required></textarea>
+        <button type="submit" class="bg-green-500 hover:bg-green-600 py-2 px-4 rounded">Atualizar</button>
+      </form>
+    </div>
   </main>
   <script>
     const projectId = 'code_e63283';
     const token = localStorage.getItem('token');
-    if(!token) {
+    if(!token){
       window.location.href = 'login.html';
     }
 
@@ -60,6 +64,15 @@
       loadGames();
     }
 
+    async function updateGame(gameId, updates){
+      await fetch(`https://api.greb.com.br/functions/${projectId}/admin_games`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ action: 'update', game_id: gameId, updates })
+      });
+      loadGames();
+    }
+
     function renderGames(games){
       const tbody = document.getElementById('gamesTable');
       tbody.innerHTML = '';
@@ -74,7 +87,7 @@
           <td class="py-2 px-4 border-b">
             <button onclick="deleteGame(${game.id})" class="bg-red-500 hover:bg-red-600 py-1 px-2 rounded">Delete</button>
           </td>
-        `;
+        ";
         tbody.appendChild(tr);
       });
     }
@@ -84,22 +97,17 @@
       renderGames(games);
     }
 
-    document.getElementById('updateGameForm').addEventListener('submit', async (e) => {
+    document.getElementById('updateGameForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      const gameId = document.getElementById('gameId').value;
+      const gameId = document.getElementById('updateGameId').value;
       let updates = {};
-      try {
-        updates = JSON.parse(document.getElementById('updates').value);
-      } catch(err) {
-        alert('Formato de updates inválido. Use JSON.');
+      try{
+        updates = JSON.parse(document.getElementById('updateGameState').value);
+      } catch(e){
+        alert('Estado inválido. Use JSON.');
         return;
       }
-      await fetch(`https://api.greb.com.br/functions/${projectId}/admin_games`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ action: 'update', game_id: parseInt(gameId), updates })
-      });
-      loadGames();
+      updateGame(gameId, updates);
     });
 
     loadGames();
