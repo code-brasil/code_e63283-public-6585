@@ -3,314 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blackjack Challenge - Mesa Realista</title>
+  <title>Blackjack Virtual - Jogue Grátis</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     body {
-      background-color: #121212;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
     }
-    /* Mesa com sensação de felt verde */
-    .table-container {
-      background: url('https://www.shutterstock.com/image-vector/black-jack-table-background-green-600nw-1937358541.jpg'); /* textura de felt verde */
-      background-size: cover;
-      border: 2px solid #004d00;
-      border-radius: 20px;
-      padding: 20px;
-      margin: 20px auto;
-      max-width: 900px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-    }
-    .section-title {
-      text-align: center;
-      color: #F9F871;
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-    }
-    .cards-row {
+    .hero {
+      min-height: 100vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      margin: 10px 0;
-      min-height: 150px;
-    }
-    /* Estilos das cartas com efeito 3D */
-    .card-container {
-      perspective: 1000px;
-      margin: 0 5px;
-    }
-    .card {
-      width: 80px;
-      height: 120px;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.6s;
-      cursor: pointer;
-    }
-    .card.flipped {
-      transform: rotateY(180deg);
-    }
-    .card-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: bold;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }
-    .card-front {
-      background: white;
-      color: black;
-      border: 1px solid #ccc;
-    }
-    .card-back {
-      background: linear-gradient(135deg, #1e3a8a, #2563eb);
-      color: white;
-      transform: rotateY(180deg);
-      border: 1px solid #004dff;
-    }
-    /* Animação de slide in */
-    @keyframes slideIn {
-      0% { transform: translateY(-20px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
-    }
-    .animate-slide {
-      animation: slideIn 0.5s ease-out;
-    }
-    /* Botões e controles */
-    .controls {
       text-align: center;
-      margin-top: 20px;
+      padding: 0 20px;
+    }
+    .btn-play {
+      background: #38b2ac;
+      padding: 1rem 2rem;
+      border-radius: 9999px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      transition: transform 0.2s;
+    }
+    .btn-play:hover {
+      transform: scale(1.05);
     }
   </style>
 </head>
-<body class="text-white">
-  <header class="p-4 flex justify-between items-center">
-    <h1 class="text-3xl font-bold text-green-400">Blackjack Challenge</h1>
-    <nav>
-      <a href="admin.html" class="text-green-300 hover:underline">Painel Admin</a>
-    </nav>
-  </header>
-  <main class="p-4">
-    <section id="welcomeSection" class="mb-8">
-      <p class="mb-4 text-center text-xl">Bem-vindo ao Blackjack Challenge! Você inicia com <span id="userBalance">1000</span> reais.</p>
-      <div class="flex justify-center items-center space-x-4 mb-4">
-        <label for="betSelect">Aposte:</label>
-        <select id="betSelect" class="text-black p-2 rounded">
-          <option value="10">R$10</option>
-          <option value="25">R$25</option>
-          <option value="50">R$50</option>
-          <option value="100">R$100</option>
-          <option value="250">R$250</option>
-          <option value="500">R$500</option>
-        </select>
-      </div>
-      <div class="text-center">
-        <button id="startGame" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Iniciar Jogo</button>
-      </div>
-    </section>
-
-    <!-- Mesa de Jogo -->
-    <section id="gameArea" class="hidden">
-      <div class="table-container">
-        <!-- Dealer Section -->
-        <div>
-          <div class="section-title">Dealer</div>
-          <div id="dealerCards" class="cards-row"></div>
-        </div>
-        <!-- Pot ou Área de Jogada (opcional Central) -->
-        <div id="gameInfo" class="text-center my-4">
-          <p id="playerTotal" class="text-xl"></p>
-        </div>
-        <!-- Player Section -->
-        <div>
-          <div class="section-title">Você</div>
-          <div id="playerCards" class="cards-row"></div>
-        </div>
-      </div>
-      <div class="controls">
-        <button id="hit" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded mx-2">Hit</button>
-        <button id="stand" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded mx-2">Stand</button>
-        <button id="exit" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded mx-2">Sair</button>
-      </div>
-    </section>
-  </main>
-
+<body>
+  <section class="hero">
+    <h1 class="text-5xl font-extrabold mb-4">Bem-vindo ao Blackjack Virtual</h1>
+    <p class="text-xl mb-8">Jogue com dinheiro virtual e gratuitamente! Encare desafios realistas, aposte nos valores: R$10, R$25, R$50, R$100, R$250 e R$500, e transforme suas jogadas em vitórias emocionantes.</p>
+    <button id="btnJogar" class="btn-play">Jogar Agora</button>
+  </section>
   <script>
-    const projectId = 'code_e63283';
-    let gameId = null;
-    let userId = 1; // Para testes, usuário fixo
-    let dealerRevealed = false; // Se o dealer já revelou todas as cartas (após 'stand')
-
-    async function createUser(name) {
-      const response = await fetch(`https://api.greb.com.br/functions/${projectId}/create_user`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name })
-      });
-      return await response.json();
-    }
-
-    async function startNewGame(bet) {
-      const response = await fetch(`https://api.greb.com.br/functions/${projectId}/blackjack`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'new_game', user_id: userId, bet: parseInt(bet) })
-      });
-      return await response.json();
-    }
-
-    async function hitGame() {
-      const response = await fetch(`https://api.greb.com.br/functions/${projectId}/blackjack`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'hit', game_id: gameId })
-      });
-      return await response.json();
-    }
-
-    async function standGame() {
-      const response = await fetch(`https://api.greb.com.br/functions/${projectId}/blackjack`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'stand', game_id: gameId })
-      });
-      return await response.json();
-    }
-
-    // Função para criar elementos de cartas
-    function createCardElement(card, faceUp) {
-      const container = document.createElement('div');
-      container.className = 'card-container animate-slide';
-      const cardEl = document.createElement('div');
-      cardEl.className = 'card';
-      if (faceUp) cardEl.classList.add('flipped');
-      
-      const front = document.createElement('div');
-      front.className = 'card-face card-front';
-      front.innerText = card.display;
-      
-      const back = document.createElement('div');
-      back.className = 'card-face card-back';
-      back.innerText = '★';
-      
-      cardEl.appendChild(front);
-      cardEl.appendChild(back);
-      container.appendChild(cardEl);
-      return container;
-    }
-
-    // Renderiza cartas do jogador (todas visíveis)
-    function renderPlayerCards(cards) {
-      const container = document.getElementById('playerCards');
-      container.innerHTML = '';
-      cards.forEach(card => {
-        container.appendChild(createCardElement(card, true));
-      });
-    }
-
-    // Renderiza cartas do dealer: antes do stand, somente a primeira carta é visível; após stand, todas ficam visíveis
-    function renderDealerCards(cards) {
-      const container = document.getElementById('dealerCards');
-      container.innerHTML = '';
-      cards.forEach((card, index) => {
-        let faceUp = false;
-        if (dealerRevealed) {
-          faceUp = true;
-        } else {
-          // Antes de finalizar a jogada, somente a primeira carta é revelada
-          faceUp = index === 0;
-        }
-        container.appendChild(createCardElement(card, faceUp));
-      });
-    }
-
-    // Calcula total da mão conforme regras do blackjack
-    function calculateHandTotal(cards) {
-      let total = 0;
-      let aces = 0;
-      cards.forEach(card => {
-        total += card.value;
-        if (card.display === 'A') aces++;
-      });
-      while (total > 21 && aces > 0) {
-        total -= 10;
-        aces--;
-      }
-      return total;
-    }
-
-    document.getElementById('startGame').addEventListener('click', async () => {
-      const bet = document.getElementById('betSelect').value;
-      dealerRevealed = false;
-      const game = await startNewGame(bet);
-      if (game.error) {
-        alert(game.error);
-        return;
-      }
-      gameId = game.game_id;
-      document.getElementById('userBalance').innerText = game.balance;
-      renderPlayerCards(game.player_cards);
-      renderDealerCards(game.dealer_cards);
-      document.getElementById('playerTotal').innerText = 'Total: ' + calculateHandTotal(game.player_cards);
-      document.getElementById('welcomeSection').classList.add('hidden');
-      document.getElementById('gameArea').classList.remove('hidden');
-    });
-
-    document.getElementById('hit').addEventListener('click', async () => {
-      const result = await hitGame();
-      if (result.error) {
-        alert(result.error);
-        return;
-      }
-      // Atualiza a mão do jogador
-      const playerContainer = document.getElementById('playerCards');
-      playerContainer.appendChild(createCardElement(result.card, true));
-      let currentCards = [];
-      // Pega as cartas atuais recarregando:
-      result.player_cards = [];
-      // Para efeito simplificado, vamos reconstruir a mão somando a nova carta com o total mostrado
-      // Em produção, o backend retornaria o estado completo do jogo
-      const totalEl = document.getElementById('playerTotal');
-      let currentTotal = parseInt(totalEl.innerText.replace('Total: ', ''));
-      currentTotal = result.player_total; // Assume retorno correto
-      totalEl.innerText = 'Total: ' + currentTotal;
-      if (result.status === 'bust') {
-        alert('Você estourou!');
-      }
-    });
-
-    document.getElementById('stand').addEventListener('click', async () => {
-      dealerRevealed = true;
-      const result = await standGame();
-      if (result.error) {
-        alert(result.error);
-        return;
-      }
-      renderPlayerCards(result.player_cards);
-      renderDealerCards(result.dealer_cards);
-      if (result.outcome === 'win') {
-        alert('Você ganhou!');
-      } else if (result.outcome === 'tie') {
-        alert('Empate!');
+    document.getElementById('btnJogar').addEventListener('click', () => {
+      const token = localStorage.getItem('token');
+      if(token){
+        window.location.href = 'game.html';
       } else {
-        alert('Você perdeu!');
+        window.location.href = 'login.html';
       }
-      document.getElementById('userBalance').innerText = result.balance;
-      document.getElementById('playerTotal').innerText = 'Total: ' + calculateHandTotal(result.player_cards);
     });
-
-    document.getElementById('exit').addEventListener('click', () => {
-      location.reload();
-    });
-
-    (async () => {
-      await createUser('Jogador');
-    })();
   </script>
 </body>
 </html>
