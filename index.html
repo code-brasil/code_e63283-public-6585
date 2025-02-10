@@ -5,6 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blackjack Challenge</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* Estilos para as cartas */
+    .card-container {
+      perspective: 1000px;
+    }
+    .card {
+      width: 80px;
+      height: 120px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      cursor: pointer;
+      margin: 0.5rem;
+    }
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .card-front {
+      background: white;
+      color: black;
+    }
+    .card-back {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: white;
+      transform: rotateY(180deg);
+    }
+    @keyframes slideIn {
+      0% { transform: translateX(-100%); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+    .animate-slide {
+      animation: slideIn 0.5s ease-out;
+    }
+  </style>
 </head>
 <body class="bg-gray-900 text-white">
   <header class="p-4 flex justify-between items-center">
@@ -15,15 +62,35 @@
   </header>
 
   <main class="p-4">
-    <section class="mb-8">
-      <p class="mb-4">Bem-vindo ao Blackjack Challenge! Prepare-se para enfrentar o computador neste clássico jogo de cartas com animações dinâmicas e muita emoção.</p>
+    <section id="welcomeSection" class="mb-8">
+      <p class="mb-4">Bem-vindo ao Blackjack Challenge! Escolha sua aposta e inicie o jogo. Você começa com <span id="userBalance">1000</span> reais.</p>
+      <div class="mb-4">
+        <span class="mr-2">Aposte: </span>
+        <select id="betSelect" class="text-black p-2 rounded">
+          <option value="10">R$10</option>
+          <option value="25">R$25</option>
+          <option value="50">R$50</option>
+          <option value="100">R$100</option>
+          <option value="250">R$250</option>
+          <option value="500">R$500</option>
+        </select>
+      </div>
       <button id="startGame" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Iniciar Jogo</button>
     </section>
+
     <section id="gameArea" class="hidden">
-      <h2 class="text-2xl mb-4">Mesa de Jogo</h2>
-      <div id="status" class="mb-4"></div>
-      <div id="playerCards" class="mb-4"></div>
-      <div id="dealerCards" class="mb-4"></div>
+      <div class="mb-4">
+        <h2 class="text-2xl">Mesa de Jogo</h2>
+      </div>
+      <div class="mb-4">
+        <h3>Cartas do Jogador</h3>
+        <div id="playerCards" class="flex"></div>
+        <p id="playerTotal"></p>
+      </div>
+      <div class="mb-4">
+        <h3>Cartas do Dealer</h3>
+        <div id="dealerCards" class="flex"></div>
+      </div>
       <div class="space-x-2">
         <button id="hit" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Hit</button>
         <button id="stand" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Stand</button>
@@ -34,8 +101,10 @@
 
   <script>
     const projectId = 'code_e63283';
+    let gameId = null;
+    let userId = 1; // Para fins de demonstração, usamos um usuário fixo com id 1
 
-    // Exemplo: Criação de usuário via função backend
+    // Função para criar usuário (caso não exista, o setup deve ter criado já com saldo 1000)
     async function createUser(name) {
       const response = await fetch(`https://api.greb.com.br/functions/${projectId}/create_user`, {
         method: 'POST',
@@ -45,38 +114,146 @@
       return await response.json();
     }
 
-    // Iniciar nova partida
-    async function startNewGame() {
-      const response = await fetch(`https://api.greb.com.br/functions/${projectId}/process`, {
+    // Função para iniciar um novo jogo
+    async function startNewGame(bet) {
+      const response = await fetch(`https://api.greb.com.br/functions/${projectId}/blackjack`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'new_game' })
+        body: JSON.stringify({ action: 'new_game', user_id: userId, bet: parseInt(bet) })
       });
       return await response.json();
     }
 
+    // Função para executar o hit
+    async function hitGame() {
+      const response = await fetch(`https://api.greb.com.br/functions/${projectId}/blackjack`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'hit', game_id: gameId })
+      });
+      return await response.json();
+    }
+
+    // Função para encerrar (stand) o jogo
+    async function standGame() {
+      const response = await fetch(`https://api.greb.com.br/functions/${projectId}/blackjack`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stand', game_id: gameId })
+      });
+      return await response.json();
+    }
+
+    // Função para criar um elemento de carta
+    function createCardElement(card, faceUp = true) {
+      const container = document.createElement('div');
+      container.className = 'card-container animate-slide';
+      const cardEl = document.createElement('div');
+      cardEl.className = 'card';
+      if (faceUp) cardEl.classList.add('flipped');
+      
+      const front = document.createElement('div');
+      front.className = 'card-face card-front';
+      front.innerText = faceUp ? card.display : '';
+      
+      const back = document.createElement('div');
+      back.className = 'card-face card-back';
+      back.innerText = faceUp ? '' : '★';
+      
+      cardEl.appendChild(front);
+      cardEl.appendChild(back);
+      container.appendChild(cardEl);
+      return container;
+    }
+
+    // Atualiza a área das cartas
+    function renderCards(containerId, cards, faceUp = true) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      cards.forEach(card => {
+        container.appendChild(createCardElement(card, faceUp));
+      });
+    }
+
+    // Eventos
     document.getElementById('startGame').addEventListener('click', async () => {
-      // Criar usuário (exemplo inicial)
-      const user = await createUser('Jogador');
-      console.log('Usuário criado:', user);
-      // Iniciar partida
-      const gameData = await startNewGame();
-      document.getElementById('status').innerText = 'Jogo iniciado!';
-      document.getElementById('playerCards').innerText = 'Cartas do Jogador: ' + gameData.player_cards.join(', ');
-      document.getElementById('dealerCards').innerText = 'Carta do Dealer: ' + gameData.dealer_cards.join(', ');
+      const bet = document.getElementById('betSelect').value;
+      // Se necessário, podemos criar o usuário... para fins de exemplo, assumimos userId=1
+      const game = await startNewGame(bet);
+      if (game.error) {
+        alert(game.error);
+        return;
+      }
+      gameId = game.game_id;
+      document.getElementById('userBalance').innerText = game.balance;
+      renderCards('playerCards', game.player_cards, true);
+      // Dealer: mostra somente a carta visível (carta virada para cima) e oculta as demais
+      renderCards('dealerCards', game.dealer_cards, true);
       document.getElementById('gameArea').classList.remove('hidden');
+      document.getElementById('welcomeSection').classList.add('hidden');
+      document.getElementById('playerTotal').innerText = 'Total: ' + calculateHandTotal(game.player_cards);
     });
 
-    // Os botões 'hit', 'stand' e 'exit' podem ser implementados posteriormente
-    document.getElementById('hit').addEventListener('click', () => {
-      alert('Função HIT não implementada no MVP');
+    document.getElementById('hit').addEventListener('click', async () => {
+      const result = await hitGame();
+      if (result.error) {
+        alert(result.error);
+        return;
+      }
+      // Adiciona a nova carta
+      const playerCardsResponse = result.card;
+      // Atualiza as cartas do jogador (para simplificar, fazemos um novo fetch do game state não sendo feito aqui, mas usando a resposta parcial)
+      // Em um cenário completo, o backend retornaria as cartas atualizadas
+      // Atualiza apenas adicionando a carta visualmente
+      const playerContainer = document.getElementById('playerCards');
+      playerContainer.appendChild(createCardElement(result.card, true));
+      document.getElementById('playerTotal').innerText = 'Total: ' + result.player_total;
+      if (result.status === 'bust') {
+        alert('Você estourou!');
+      }
     });
-    document.getElementById('stand').addEventListener('click', () => {
-      alert('Função STAND não implementada no MVP');
+
+    document.getElementById('stand').addEventListener('click', async () => {
+      const result = await standGame();
+      if (result.error) {
+        alert(result.error);
+        return;
+      }
+      renderCards('playerCards', result.player_cards, true);
+      renderCards('dealerCards', result.dealer_cards, true);
+      if (result.outcome === 'win') {
+        alert('Você ganhou!');
+      } else if (result.outcome === 'tie') {
+        alert('Empate!');
+      } else {
+        alert('Você perdeu!');
+      }
+      document.getElementById('userBalance').innerText = result.balance;
     });
+
     document.getElementById('exit').addEventListener('click', () => {
       location.reload();
     });
+
+    // Função para calcular o total da mão (mesma lógica do backend para efeito visual simplificado)
+    function calculateHandTotal(cards) {
+      let total = 0;
+      let aces = 0;
+      cards.forEach(card => {
+        total += card.value;
+        if (card.display === 'A') aces++;
+      });
+      while (total > 21 && aces > 0) {
+        total -= 10;
+        aces--;
+      }
+      return total;
+    }
+
+    // Inicializa usuário (para demonstração, criamos se necessário, mas idealmente o usuário já existiria)
+    (async () => {
+      await createUser('Jogador');
+    })();
   </script>
 </body>
 </html>
