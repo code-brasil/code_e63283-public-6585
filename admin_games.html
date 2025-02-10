@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciamento de Partidas - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+  <header class="p-4 flex justify-between items-center">
+    <h1 class="text-3xl font-bold">Partidas em Andamento</h1>
+    <nav>
+      <a href="admin_index.html" class="text-green-300 hover:underline">Dashboard</a>
+    </nav>
+  </header>
+  <main class="p-4">
+    <table class="min-w-full bg-gray-800">
+      <thead>
+        <tr>
+          <th class="py-2 px-4 border-b">ID</th>
+          <th class="py-2 px-4 border-b">User ID</th>
+          <th class="py-2 px-4 border-b">Bet</th>
+          <th class="py-2 px-4 border-b">Result</th>
+          <th class="py-2 px-4 border-b">State</th>
+          <th class="py-2 px-4 border-b">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="gamesTable">
+      </tbody>
+    </table>
+  </main>
+  <script>
+    const projectId = 'code_e63283';
+    const token = localStorage.getItem('token');
+    if(!token){
+      window.location.href = 'login.html';
+    }
+
+    async function fetchGames(){
+      const response = await fetch(`https://api.greb.com.br/functions/${projectId}/admin_games`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ action: 'list' })
+      });
+      const data = await response.json();
+      return data.games || [];
+    }
+
+    async function deleteGame(gameId){
+      await fetch(`https://api.greb.com.br/functions/${projectId}/admin_games`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ action: 'delete', game_id: gameId })
+      });
+      loadGames();
+    }
+
+    function renderGames(games){
+      const tbody = document.getElementById('gamesTable');
+      tbody.innerHTML = '';
+      games.forEach(game => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2 px-4 border-b">${game.id}</td>
+          <td class="py-2 px-4 border-b">${game.user_id}</td>
+          <td class="py-2 px-4 border-b">${game.bet}</td>
+          <td class="py-2 px-4 border-b">${game.result}</td>
+          <td class="py-2 px-4 border-b"><pre>${JSON.stringify(game.state)}</pre></td>
+          <td class="py-2 px-4 border-b">
+            <button onclick="deleteGame(${game.id})" class="bg-red-500 hover:bg-red-600 py-1 px-2 rounded">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadGames(){
+      const games = await fetchGames();
+      renderGames(games);
+    }
+
+    loadGames();
+  </script>
+</body>
+</html>
