@@ -20,9 +20,14 @@
       </div>
       <button type="submit" class="w-full bg-green-500 hover:bg-green-600 py-2 rounded">Entrar</button>
     </form>
-    <p class="mt-4 text-center">Não possui conta? <a href="signup.html" class="text-green-400 hover:underline">Cadastre-se</a></p>
+    <p id="signupPrompt" class="mt-4 text-center">Não possui conta? <a id="linkSignup" href="#" class="text-green-400 hover:underline">Cadastre-se</a></p>
   </div>
   <script>
+    // Se já estiver logado, redireciona para game.html
+    if(localStorage.getItem('token')){
+      window.location.href = 'game.html';
+    }
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('email').value;
@@ -33,12 +38,26 @@
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (data.error) {
-        alert(data.error);
+      if(data.error) {
+        // Se o erro for de credenciais, direciona para signup com email pré-preenchido
+        if(data.error.toLowerCase().includes('credenciais')) {
+          if(confirm('Credenciais inválidas. Deseja se cadastrar?')) {
+            window.location.href = `signup.html?email=${encodeURIComponent(email)}`;
+          }
+        } else {
+          alert(data.error);
+        }
       } else {
         localStorage.setItem('token', data.token);
         window.location.href = 'game.html';
       }
+    });
+
+    // Link para cadastro
+    document.getElementById('linkSignup').addEventListener('click', (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('email').value;
+      window.location.href = `signup.html?email=${encodeURIComponent(emailInput)}`;
     });
   </script>
 </body>
