@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Blackjack Challenge</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+  <header class="p-4 flex justify-between items-center">
+    <h1 class="text-3xl font-bold">Painel Administrativo</h1>
+    <button id="logout" class="bg-red-500 hover:bg-red-600 py-2 px-4 rounded">Sair</button>
+  </header>
+  <main class="p-4">
+    <nav class="flex space-x-4 mb-6">
+      <a href="admin_dashboard.html" class="text-green-300 hover:underline">Dashboard</a>
+      <a href="admin_games.html" class="text-green-300 hover:underline">Partidas</a>
+      <a href="admin_users.html" class="text-green-300 hover:underline">Usuários</a>
+    </nav>
+    <section>
+      <h2 class="text-2xl mb-4">Visão Geral</h2>
+      <p>Bem-vindo ao painel administrativo do Blackjack Challenge. Use as abas para gerenciar partidas e usuários.</p>
+    </section>
+  </main>
+  <script>
+    const token = localStorage.getItem('token');
+    if(!token){
+      window.location.href = 'login.html';
+    }
+    document.getElementById('logout').addEventListener('click', ()=>{
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>
