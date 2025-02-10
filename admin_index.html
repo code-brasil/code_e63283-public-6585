@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Administrativo - Blackjack Challenge</title>
+  <title>Admin Dashboard - Blackjack Challenge</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white">
@@ -17,17 +17,16 @@
       <a href="admin_users.html" class="text-green-300 hover:underline">Usuários</a>
     </nav>
     <section>
-      <p>Bem-vindo ao painel administrativo do Blackjack Challenge.<br>Utilize as abas acima para gerenciar partidas e usuários.</p>
+      <p>Bem-vindo ao painel administrativo do Blackjack Challenge.<br>
+      Utilize as abas acima para gerenciar partidas e usuários.</p>
     </section>
   </main>
   <script>
-    // Verifica autenticação admin
     const token = localStorage.getItem('token');
     if(!token) {
       window.location.href = 'login.html';
     }
-
-    document.getElementById('logout').addEventListener('click', ()=>{
+    document.getElementById('logout').addEventListener('click', () => {
       localStorage.removeItem('token');
       window.location.href = 'login.html';
     });
